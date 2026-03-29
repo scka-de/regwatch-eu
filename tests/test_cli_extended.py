@@ -36,29 +36,29 @@ def _seed_cache(tmp_path, items=None):
 def test_cli_update_passes_llm_api_key(tmp_path):
     """update command reads REGWATCH_LLM_API_KEY from env and passes to RegWatch."""
     runner = CliRunner()
-    with patch("regwatch.cli.RegWatch") as MockRW:
+    with patch("regwatch.cli.RegWatch") as mock_rw:
         instance = MagicMock()
         instance.update.return_value = {"eurlex": 0}
         instance.__enter__ = MagicMock(return_value=instance)
         instance.__exit__ = MagicMock(return_value=False)
-        MockRW.return_value = instance
+        mock_rw.return_value = instance
         runner.invoke(cli, ["update"], env={
             "REGWATCH_CACHE_DIR": str(tmp_path),
             "REGWATCH_LLM_API_KEY": "sk-ant-test123",
         })
-    MockRW.assert_called_once_with(cache_dir=str(tmp_path), llm_api_key="sk-ant-test123")
+    mock_rw.assert_called_once_with(cache_dir=str(tmp_path), llm_api_key="sk-ant-test123")
 
 
 def test_cli_update_happy_path(tmp_path):
     """update command prints source stats and total."""
     runner = CliRunner()
     mock_stats = {"eurlex": 3, "esma": 5, "eba": 2}
-    with patch("regwatch.cli.RegWatch") as MockRW:
+    with patch("regwatch.cli.RegWatch") as mock_rw:
         instance = MagicMock()
         instance.update.return_value = mock_stats
         instance.__enter__ = MagicMock(return_value=instance)
         instance.__exit__ = MagicMock(return_value=False)
-        MockRW.return_value = instance
+        mock_rw.return_value = instance
         result = runner.invoke(cli, ["update"], env={"REGWATCH_CACHE_DIR": str(tmp_path)})
 
     assert result.exit_code == 0
@@ -69,12 +69,12 @@ def test_cli_update_with_failures(tmp_path):
     """update command handles failed sources gracefully."""
     runner = CliRunner()
     mock_stats = {"eurlex": 3, "esma": -1, "eba": 2}
-    with patch("regwatch.cli.RegWatch") as MockRW:
+    with patch("regwatch.cli.RegWatch") as mock_rw:
         instance = MagicMock()
         instance.update.return_value = mock_stats
         instance.__enter__ = MagicMock(return_value=instance)
         instance.__exit__ = MagicMock(return_value=False)
-        MockRW.return_value = instance
+        mock_rw.return_value = instance
         result = runner.invoke(cli, ["update"], env={"REGWATCH_CACHE_DIR": str(tmp_path)})
 
     assert result.exit_code == 0

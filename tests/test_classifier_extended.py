@@ -20,7 +20,8 @@ def test_classify_urgency_opinion_is_low():
 
 
 def test_classify_urgency_enters_into_force():
-    assert classify_urgency("Regulation enters into force on 1 January", "legislative_act") == "high"
+    result = classify_urgency("Regulation enters into force on 1 January", "legislative_act")
+    assert result == "high"
 
 
 def test_classify_regulation_eurovoc_match():
@@ -69,7 +70,9 @@ def test_classify_regulation_llm_fallback_called():
         url="http://example.com/3",
         source="eurlex",
     )
-    fake_llm = lambda title, desc: "mica"
+    def fake_llm(title, desc):
+        return "mica"
+
     result = classify_regulation(raw, [reg], llm_classify=fake_llm)
     assert result == "mica"
 
@@ -84,7 +87,11 @@ def test_classify_regulation_llm_not_called_when_deterministic_matches():
         source="eurlex",
     )
     calls = []
-    fake_llm = lambda title, desc: calls.append(1) or "mica"
+
+    def fake_llm(title, desc):
+        calls.append(1)
+        return "mica"
+
     result = classify_regulation(raw, [reg], llm_classify=fake_llm)
     assert result == "dora"
     assert len(calls) == 0

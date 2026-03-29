@@ -1,7 +1,7 @@
 """Tests for RegWatch.update() pipeline — the core fetch→classify→cache flow."""
 
 from datetime import date, timedelta
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from regwatch import DEFAULT_INITIAL_LOOKBACK_DAYS, RegWatch
 from regwatch.models import RawChange
