@@ -36,22 +36,13 @@ class EbaSource:
         feed = feedparser.parse(response.text)
         results: list[RawChange] = []
 
-        # Collect all keywords from requested regulations
-        all_keywords = []
-        for reg in regulations:
-            all_keywords.extend(kw.lower() for kw in reg.keywords)
-            all_keywords.extend(tag.lower() for tag in reg.eba_tags)
-
         for entry in feed.entries:
             raw = self._parse_entry(entry)
             if raw is None or not raw.url:
                 continue
             if raw.date < since:
                 continue
-            # Filter by regulation keywords in title
-            title_lower = raw.title.lower()
-            if any(kw in title_lower for kw in all_keywords):
-                results.append(raw)
+            results.append(raw)
 
         return results
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 
 import click
+import pandas as pd
 from rich.console import Console
 from rich.table import Table
 
@@ -73,11 +74,12 @@ def check(regulation, since, doc_type, source, fmt):
         table.add_column("Source")
         table.add_column("Title", max_width=60)
         for _, row in df.iterrows():
+            reg = row["regulation"]
             table.add_row(
                 str(row["date"]),
-                row["regulation"] or "---",
-                row["type"],
-                row["source"],
+                str(reg) if pd.notna(reg) else "---",
+                str(row["type"]),
+                str(row["source"]),
                 str(row["title"])[:60],
             )
         console.print(table)
