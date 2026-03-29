@@ -62,7 +62,18 @@ All sources are public. No API keys required.
 
 ## LLM Classification (Optional)
 
-For higher classification accuracy, provide an LLM API key:
+For higher classification accuracy, provide an LLM API key.
+
+**CLI** — set the environment variable:
+
+```bash
+export REGWATCH_LLM_API_KEY="sk-ant-..."  # Claude
+export REGWATCH_LLM_API_KEY="sk-..."      # OpenAI
+
+regwatch update  # now uses LLM fallback for ambiguous items
+```
+
+**Python API:**
 
 ```python
 rw = RegWatch(llm_api_key="sk-ant-...")  # Claude

@@ -33,6 +33,22 @@ def _seed_cache(tmp_path, items=None):
     return items
 
 
+def test_cli_update_passes_llm_api_key(tmp_path):
+    """update command reads REGWATCH_LLM_API_KEY from env and passes to RegWatch."""
+    runner = CliRunner()
+    with patch("regwatch.cli.RegWatch") as MockRW:
+        instance = MagicMock()
+        instance.update.return_value = {"eurlex": 0}
+        instance.__enter__ = MagicMock(return_value=instance)
+        instance.__exit__ = MagicMock(return_value=False)
+        MockRW.return_value = instance
+        runner.invoke(cli, ["update"], env={
+            "REGWATCH_CACHE_DIR": str(tmp_path),
+            "REGWATCH_LLM_API_KEY": "sk-ant-test123",
+        })
+    MockRW.assert_called_once_with(cache_dir=str(tmp_path), llm_api_key="sk-ant-test123")
+
+
 def test_cli_update_happy_path(tmp_path):
     """update command prints source stats and total."""
     runner = CliRunner()

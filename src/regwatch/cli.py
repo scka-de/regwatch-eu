@@ -17,6 +17,10 @@ def _get_cache_dir() -> str:
     return os.environ.get("REGWATCH_CACHE_DIR", DEFAULT_CACHE_DIR)
 
 
+def _get_llm_api_key() -> str | None:
+    return os.environ.get("REGWATCH_LLM_API_KEY")
+
+
 @click.group()
 @click.version_option(version=__version__)
 def cli():
@@ -30,7 +34,7 @@ def cli():
 @click.option("--source", default=None, help="Only fetch from this source (eurlex, esma, eba).")
 def update(source):
     """Fetch latest changes from all sources."""
-    with RegWatch(cache_dir=_get_cache_dir()) as rw:
+    with RegWatch(cache_dir=_get_cache_dir(), llm_api_key=_get_llm_api_key()) as rw:
         stats = rw.update(source=source)
     for src_id, count in stats.items():
         if count == -1:
