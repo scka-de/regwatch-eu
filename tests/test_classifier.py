@@ -107,3 +107,45 @@ def test_classify_urgency_q_and_a():
 
 def test_classify_urgency_default():
     assert classify_urgency("Regular document", "guideline") == "medium"
+
+
+def test_classify_regulation_empty_title_and_description():
+    """Edge: empty strings should return None, not crash."""
+    raw = RawChange(title="", date=date(2026, 3, 15), url="http://x.com", source="eurlex")
+    assert classify_regulation(raw, ALL_REGULATIONS) is None
+
+
+def test_classify_regulation_case_insensitive():
+    """Edge: keywords should match regardless of case."""
+    raw = RawChange(
+        title="dora guidelines", date=date(2026, 3, 15),
+        url="http://x.com", source="eurlex",
+    )
+    assert classify_regulation(raw, ALL_REGULATIONS) == "dora"
+    raw2 = RawChange(
+        title="DORA GUIDELINES", date=date(2026, 3, 15),
+        url="http://x.com", source="eurlex",
+    )
+    assert classify_regulation(raw2, ALL_REGULATIONS) == "dora"
+
+
+def test_classify_type_case_insensitive():
+    """Edge: type patterns should match regardless of case."""
+    assert classify_type("EBA PUBLISHES FINAL GUIDELINES") == "guideline"
+    assert classify_type("New Consultation Paper") == "consultation"
+
+
+def test_classify_regulation_word_boundary_short_keywords():
+    """Edge: short keywords like DORA should NOT match 'Pandora', 'adorable'."""
+    raw = RawChange(title="Pandora papers investigation", date=date(2026, 3, 15),
+                    url="http://x.com", source="eurlex")
+    result = classify_regulation(raw, ALL_REGULATIONS)
+    assert result != "dora"  # Should NOT match "Pandora"
+
+
+def test_classify_regulation_word_boundary_aml():
+    """Edge: AML-like keywords should not match 'caml' or 'hamlet'."""
+    raw = RawChange(title="The OCaml programming language", date=date(2026, 3, 15),
+                    url="http://x.com", source="eurlex")
+    result = classify_regulation(raw, ALL_REGULATIONS)
+    assert result != "amld6"

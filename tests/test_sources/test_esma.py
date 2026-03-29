@@ -51,6 +51,51 @@ def test_esma_parse_entry():
     assert "<" not in result.description  # HTML stripped
 
 
+def test_esma_returns_items_without_keyword_in_title():
+    """Regression: RSS source must not pre-filter by keywords. Classifier handles that."""
+    source = EsmaSource()
+    entry = {
+        "title": "New regulatory standards published",  # No regulation keywords
+        "link": "https://www.esma.europa.eu/test",
+        "summary": (
+            '<time datetime="2026-03-15T10:00:00+01:00">15 March 2026</time>'
+            " About MiCA crypto-assets"
+        ),
+    }
+    result = source._parse_entry(entry)
+    assert result is not None
+    assert result.title == "New regulatory standards published"
+    # The source returns it; the classifier (not the source) decides relevance
+
+
+def test_esma_date_extraction_iso_datetime():
+    """Edge: time tag might have full ISO datetime."""
+    source = EsmaSource()
+    html = '<time datetime="2026-03-15T14:30:00+01:00">15 March 2026</time>'
+    assert source._extract_date(html) == date(2026, 3, 15)
+
+
+def test_esma_date_extraction_no_html():
+    """Edge: plain text with no HTML tags."""
+    source = EsmaSource()
+    result = source._extract_date("Just some text with no dates")
+    assert result == date.today()
+
+
+def test_esma_parse_entry_empty_title_returns_none():
+    """Edge: entry with empty title should be skipped."""
+    source = EsmaSource()
+    entry = {"title": "", "link": "https://example.com", "summary": "content"}
+    assert source._parse_entry(entry) is None
+
+
+def test_esma_parse_entry_empty_link_returns_none():
+    """Edge: entry with empty link should be skipped."""
+    source = EsmaSource()
+    entry = {"title": "Some title", "link": "", "summary": "content"}
+    assert source._parse_entry(entry) is None
+
+
 @pytest.mark.integration
 def test_esma_fetch_live():
     source = EsmaSource()

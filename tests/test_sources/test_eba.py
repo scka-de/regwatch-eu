@@ -43,6 +43,37 @@ def test_eba_parse_entry_missing_pubdate():
     assert result.date == date.today()
 
 
+def test_eba_returns_items_without_keyword_in_title():
+    """Regression: RSS source must not pre-filter by keywords. Classifier handles that."""
+    import time
+
+    source = EbaSource()
+    entry = {
+        "title": "New regulatory standards published",  # No regulation keywords
+        "link": "https://www.eba.europa.eu/test",
+        "summary": "<p>About DORA digital operational resilience</p>",
+        "published_parsed": time.strptime("2026-03-15", "%Y-%m-%d"),
+    }
+    result = source._parse_entry(entry)
+    assert result is not None
+    assert result.title == "New regulatory standards published"
+    # The source returns it; the classifier (not the source) decides relevance
+
+
+def test_eba_parse_entry_empty_title_returns_none():
+    """Edge: entry with empty title should be skipped."""
+    source = EbaSource()
+    entry = {"title": "", "link": "https://example.com", "summary": "content"}
+    assert source._parse_entry(entry) is None
+
+
+def test_eba_parse_entry_empty_link_returns_none():
+    """Edge: entry with empty link should be skipped."""
+    source = EbaSource()
+    entry = {"title": "Some title", "link": "", "summary": "content"}
+    assert source._parse_entry(entry) is None
+
+
 @pytest.mark.integration
 def test_eba_fetch_live():
     source = EbaSource()

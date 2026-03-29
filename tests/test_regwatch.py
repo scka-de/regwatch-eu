@@ -33,6 +33,13 @@ def test_regwatch_check_empty_cache(regwatch_instance):
     assert len(df) == 0
 
 
+def test_regwatch_check_invalid_since_raises(tmp_path):
+    """Regression: invalid date string should raise ValueError with message."""
+    rw = RegWatch(cache_dir=str(tmp_path / ".regwatch"))
+    with pytest.raises(ValueError, match="YYYY-MM-DD"):
+        rw.check(since="not-a-date")
+
+
 @pytest.mark.integration
 def test_regwatch_update_and_check(tmp_path):
     rw = RegWatch(cache_dir=str(tmp_path / ".regwatch"))

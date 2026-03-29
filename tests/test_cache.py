@@ -206,3 +206,61 @@ def test_cache_last_update_returns_none(cache):
 
 def test_cache_schema_version(cache):
     assert cache.schema_version() == 1
+
+
+def test_cache_upsert_updates_existing_data(cache):
+    """Edge: INSERT OR REPLACE should update changed fields."""
+    change1 = ClassifiedChange(id="abc", title="Old title", date=date(2026, 3, 15),
+              url="http://example.com/1", source="eurlex", regulation=None,
+              type="legislative_act", urgency="medium", summary=None)
+    cache.upsert([change1])
+
+    change2 = ClassifiedChange(id="abc", title="Updated title", date=date(2026, 3, 15),
+              url="http://example.com/1", source="eurlex", regulation="dora",
+              type="guideline", urgency="high", summary="Now classified")
+    cache.upsert([change2])
+
+    results = cache.query()
+    assert len(results) == 1
+    assert results[0].title == "Updated title"
+    assert results[0].regulation == "dora"
+    assert results[0].summary == "Now classified"
+
+
+def test_cache_query_multiple_regulations(cache):
+    """Edge: filtering by multiple regulations at once."""
+    changes = [
+        ClassifiedChange(id="1", title="DORA", date=date(2026, 3, 15),
+                         url="http://example.com/1", source="eurlex",
+                         regulation="dora", type="guideline", urgency="medium", summary=None),
+        ClassifiedChange(id="2", title="MiCA", date=date(2026, 3, 15),
+                         url="http://example.com/2", source="eurlex",
+                         regulation="mica", type="guideline", urgency="medium", summary=None),
+        ClassifiedChange(id="3", title="AI Act", date=date(2026, 3, 15),
+                         url="http://example.com/3", source="eurlex",
+                         regulation="ai_act", type="guideline", urgency="medium", summary=None),
+    ]
+    cache.upsert(changes)
+    results = cache.query(regulations=["dora", "mica"])
+    assert len(results) == 2
+    regs = {r.regulation for r in results}
+    assert regs == {"dora", "mica"}
+
+
+def test_cache_query_combined_filters(cache):
+    """Edge: multiple filters applied simultaneously."""
+    changes = [
+        ClassifiedChange(id="1", title="DORA guideline", date=date(2026, 3, 15),
+                         url="http://example.com/1", source="eurlex",
+                         regulation="dora", type="guideline", urgency="medium", summary=None),
+        ClassifiedChange(id="2", title="DORA consultation", date=date(2026, 3, 15),
+                         url="http://example.com/2", source="esma",
+                         regulation="dora", type="consultation", urgency="high", summary=None),
+        ClassifiedChange(id="3", title="MiCA guideline", date=date(2026, 3, 15),
+                         url="http://example.com/3", source="eurlex",
+                         regulation="mica", type="guideline", urgency="medium", summary=None),
+    ]
+    cache.upsert(changes)
+    results = cache.query(regulations=["dora"], sources=["eurlex"], types=["guideline"])
+    assert len(results) == 1
+    assert results[0].title == "DORA guideline"
