@@ -91,6 +91,13 @@ regwatch status
 regwatch regulations
 ```
 
+### Environment Variables
+
+| Variable | Description | Default |
+|---|---|---|
+| `REGWATCH_CACHE_DIR` | Cache directory | `~/.regwatch` |
+| `REGWATCH_LLM_API_KEY` | Claude or OpenAI API key for LLM classification | None (uses keyword matching) |
+
 ## License
 
 Apache 2.0

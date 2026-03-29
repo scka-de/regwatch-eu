@@ -27,13 +27,21 @@ def cli():
     """Monitor EU regulatory changes.
 
     Track DORA, MiCA, AI Act, PSD3, AMLD6 across EUR-Lex, ESMA and EBA.
+
+    \b
+    Environment variables:
+      REGWATCH_CACHE_DIR      Cache directory (default: ~/.regwatch)
+      REGWATCH_LLM_API_KEY    Claude or OpenAI API key for LLM classification
     """
 
 
 @cli.command()
 @click.option("--source", default=None, help="Only fetch from this source (eurlex, esma, eba).")
 def update(source):
-    """Fetch latest changes from all sources."""
+    """Fetch latest changes from all sources.
+
+    Set REGWATCH_LLM_API_KEY to enable LLM classification for ambiguous items.
+    """
     with RegWatch(cache_dir=_get_cache_dir(), llm_api_key=_get_llm_api_key()) as rw:
         stats = rw.update(source=source)
     for src_id, count in stats.items():
