@@ -20,7 +20,10 @@ def _get_cache_dir() -> str:
 @click.group()
 @click.version_option(version=__version__)
 def cli():
-    """Monitor EU regulatory changes. Track DORA, MiCA, AI Act, PSD3, AMLD6 across EUR-Lex, ESMA and EBA."""
+    """Monitor EU regulatory changes.
+
+    Track DORA, MiCA, AI Act, PSD3, AMLD6 across EUR-Lex, ESMA and EBA.
+    """
 
 
 @cli.command()

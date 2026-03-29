@@ -1,5 +1,3 @@
-from datetime import date
-
 import pandas as pd
 import pytest
 
@@ -7,7 +5,7 @@ from regwatch import RegWatch
 
 
 def test_regwatch_creates_cache(tmp_path):
-    rw = RegWatch(cache_dir=str(tmp_path / ".regwatch"))
+    RegWatch(cache_dir=str(tmp_path / ".regwatch"))
     assert (tmp_path / ".regwatch" / "cache.db").exists()
 
 
