@@ -34,7 +34,7 @@ class EurLexSource:
                 SPARQL_ENDPOINT,
                 data={"query": query},
                 headers={"Accept": "application/sparql-results+json"},
-                timeout=30.0,
+                timeout=90.0,
             )
             response.raise_for_status()
             return self._parse_response(response.json())
@@ -63,11 +63,12 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT DISTINCT ?cellarURI ?title ?date ?celex WHERE {{
     ?cellarURI cdm:work_date_document ?date .
-    ?cellarURI cdm:work_has_expression ?expr .
-    ?expr cdm:expression_title ?title .
+    ?expression cdm:expression_belongs_to_work ?cellarURI .
+    ?expression cdm:expression_uses_language
+        <http://publications.europa.eu/resource/authority/language/ENG> .
+    ?expression cdm:expression_title ?title .
     OPTIONAL {{ ?cellarURI cdm:resource_legal_id_celex ?celex . }}
-    FILTER(?date >= "{since.isoformat()}"^^xsd:date)
-    FILTER(LANG(?title) = "en")
+    FILTER(?date > "{since.isoformat()}"^^xsd:date)
     FILTER({keyword_filters})
 }}
 ORDER BY DESC(?date)

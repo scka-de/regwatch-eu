@@ -93,9 +93,15 @@ class RegWatch:
         sources: list[str] | None = None,
     ) -> pd.DataFrame:
         """Query regulatory changes from local cache."""
-        since_date = (
-            date.fromisoformat(since) if since else date.today() - timedelta(days=30)
-        )
+        if since:
+            try:
+                since_date = date.fromisoformat(since)
+            except ValueError:
+                raise ValueError(
+                    f"Invalid date format: '{since}'. Expected YYYY-MM-DD."
+                ) from None
+        else:
+            since_date = date.today() - timedelta(days=30)
         results = self._cache.query(
             regulations=regulations,
             since=since_date,

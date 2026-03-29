@@ -58,7 +58,10 @@ def check(regulation, since, doc_type, source, fmt):
         regs = regulation.split(",") if regulation else None
         types = [doc_type] if doc_type else None
         sources = [source] if source else None
-        df = rw.check(regulations=regs, since=since, types=types, sources=sources)
+        try:
+            df = rw.check(regulations=regs, since=since, types=types, sources=sources)
+        except ValueError as e:
+            raise click.BadParameter(str(e), param_hint="--since") from None
     if fmt == "json":
         click.echo(df.to_json(orient="records", date_format="iso", indent=2))
     elif fmt == "csv":
