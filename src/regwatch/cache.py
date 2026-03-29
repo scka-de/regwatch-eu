@@ -52,12 +52,12 @@ class Cache:
             self._conn.commit()
 
     def upsert(self, changes: list[ClassifiedChange]) -> int:
-        """Insert changes, ignoring duplicates. Returns count of new items."""
+        """Insert or update changes. Returns count of items processed."""
         cursor = self._conn.cursor()
         new_count = 0
         for change in changes:
             cursor.execute(
-                """INSERT OR IGNORE INTO changes
+                """INSERT OR REPLACE INTO changes
                    (id, date, title, regulation, type, urgency, source, url, summary)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (

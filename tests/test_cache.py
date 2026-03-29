@@ -42,7 +42,7 @@ def test_cache_upsert_new_items(cache):
     assert cache.upsert(changes) == 1
 
 
-def test_cache_upsert_deduplicates(cache):
+def test_cache_upsert_updates_existing(cache):
     change = ClassifiedChange(
         id="abc123",
         title="Test",
@@ -55,7 +55,22 @@ def test_cache_upsert_deduplicates(cache):
         summary=None,
     )
     cache.upsert([change])
-    assert cache.upsert([change]) == 0
+    # Re-upsert with updated title — should replace, not ignore
+    updated = ClassifiedChange(
+        id="abc123",
+        title="Test Updated",
+        date=date(2026, 3, 15),
+        url="http://example.com/1",
+        source="eurlex",
+        regulation="dora",
+        type="guideline",
+        urgency="medium",
+        summary=None,
+    )
+    assert cache.upsert([updated]) == 1
+    results = cache.query()
+    assert len(results) == 1
+    assert results[0].title == "Test Updated"
 
 
 def test_cache_query_no_filters(cache):

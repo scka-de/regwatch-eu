@@ -123,8 +123,14 @@ def classify_regulation(
         # Keyword matching — count each keyword hit
         keyword_hits = 0
         for kw in reg.keywords:
-            if kw.lower() in text:
-                keyword_hits += 1
+            kw_lower = kw.lower()
+            if len(kw_lower) <= 5:
+                # Short keywords need word boundaries to avoid false positives
+                if re.search(r'\b' + re.escape(kw_lower) + r'\b', text):
+                    keyword_hits += 1
+            else:
+                if kw_lower in text:
+                    keyword_hits += 1
         if reg.keywords:
             score += keyword_hits / len(reg.keywords)
 

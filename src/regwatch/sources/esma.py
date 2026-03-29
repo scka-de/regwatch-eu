@@ -71,10 +71,12 @@ class EsmaSource:
 
         return results
 
-    def _parse_entry(self, entry: dict) -> RawChange:
+    def _parse_entry(self, entry: dict) -> RawChange | None:
         """Parse a feedparser entry into a RawChange."""
-        title = entry.get("title", "")
+        title = entry.get("title", "").strip()
         link = entry.get("link", "")
+        if not title or not link:
+            return None
         summary_html = entry.get("summary", "")
 
         parsed_date = self._extract_date(summary_html)

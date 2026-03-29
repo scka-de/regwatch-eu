@@ -26,6 +26,8 @@ class EurLexSource:
 
     def fetch(self, since: date, regulations: list[Regulation]) -> list[RawChange]:
         """Fetch regulatory changes from EUR-Lex SPARQL endpoint."""
+        if not regulations:
+            return []
         query = self._build_query(since, regulations)
         try:
             response = httpx.post(
