@@ -9,7 +9,12 @@ from pathlib import Path
 import pandas as pd
 
 from regwatch.cache import Cache
-from regwatch.classifier import classify_regulation, classify_type, classify_urgency
+from regwatch.classifier import (
+    classify_regulation,
+    classify_type,
+    classify_urgency,
+    create_llm_classifier,
+)
 from regwatch.models import ClassifiedChange, make_change_id
 from regwatch.registry import get_regulations, get_sources
 
@@ -33,6 +38,7 @@ class RegWatch:
         self._regulations = get_regulations()
         self._sources = get_sources()
         self._llm_api_key = llm_api_key
+        self._llm_classify = create_llm_classifier(llm_api_key)
 
     def update(self, *, source: str | None = None) -> dict[str, int]:
         """Fetch latest changes from sources and classify them.
@@ -57,7 +63,9 @@ class RegWatch:
                 continue
             classified = []
             for raw in raw_changes:
-                regulation = classify_regulation(raw, self._regulations)
+                regulation = classify_regulation(
+                    raw, self._regulations, llm_classify=self._llm_classify
+                )
                 doc_type = classify_type(raw.title)
                 urgency = classify_urgency(raw.title, doc_type)
                 classified.append(
