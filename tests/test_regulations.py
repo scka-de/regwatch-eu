@@ -1,9 +1,8 @@
-from regwatch.regulations.base import Regulation
+from regwatch.regulations.ai_act import ai_act
+from regwatch.regulations.amld6 import amld6
 from regwatch.regulations.dora import dora
 from regwatch.regulations.mica import mica
-from regwatch.regulations.ai_act import ai_act
 from regwatch.regulations.psd3 import psd3
-from regwatch.regulations.amld6 import amld6
 
 
 def test_dora_regulation():

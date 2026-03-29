@@ -38,7 +38,10 @@ def test_esma_parse_entry():
     entry = {
         "title": "ESMA publishes DORA guidelines",
         "link": "https://www.esma.europa.eu/press-news/esma-news/example",
-        "summary": '<p><time datetime="2026-03-15T10:00:00Z">15 March 2026</time></p><p>Some description about DORA guidelines.</p>',
+        "summary": (
+            '<p><time datetime="2026-03-15T10:00:00Z">15 March 2026</time></p>'
+            "<p>Some description about DORA guidelines.</p>"
+        ),
     }
     result = source._parse_entry(entry)
     assert isinstance(result, RawChange)
