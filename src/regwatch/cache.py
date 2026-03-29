@@ -140,3 +140,13 @@ class Cache:
         """Return the current schema version."""
         row = self._conn.execute("SELECT version FROM schema_version").fetchone()
         return row["version"]
+
+    def close(self) -> None:
+        """Close the database connection."""
+        self._conn.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()

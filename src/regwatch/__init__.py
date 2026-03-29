@@ -138,3 +138,13 @@ class RegWatch:
     def sources(self) -> list[str]:
         """Return list of registered source IDs."""
         return [s.id for s in self._sources]
+
+    def close(self) -> None:
+        """Close the cache database connection."""
+        self._cache.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()

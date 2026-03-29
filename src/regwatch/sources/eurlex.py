@@ -15,6 +15,11 @@ logger = logging.getLogger(__name__)
 SPARQL_ENDPOINT = "https://publications.europa.eu/webapi/rdf/sparql"
 
 
+def _escape_sparql_string(s: str) -> str:
+    """Escape special characters for SPARQL string literals."""
+    return s.replace("\\", "\\\\").replace('"', '\\"')
+
+
 class EurLexSource:
     id: str = "eurlex"
     name: str = "EUR-Lex"
@@ -46,7 +51,7 @@ class EurLexSource:
 
         # Build FILTER clause matching any keyword in title (case-insensitive)
         keyword_filters = " || ".join(
-            f'CONTAINS(LCASE(?title), "{kw.lower()}")'
+            f'CONTAINS(LCASE(?title), "{_escape_sparql_string(kw.lower())}")'
             for kw in all_keywords
         )
 
@@ -79,7 +84,7 @@ LIMIT 200
             if not url or not title or not date_str:
                 continue
 
-            parsed_date = date.fromisoformat(date_str)
+            parsed_date = date.fromisoformat(date_str[:10])
             results.append(
                 RawChange(
                     title=title,

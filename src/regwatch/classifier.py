@@ -164,7 +164,7 @@ _TYPE_PATTERNS: list[tuple[str, str]] = [
     ("delegated_act", r"delegated\s+(regulation|act|directive)"),
     ("rts_its", r"(regulatory|implementing)\s+technical\s+standards?"),
     ("guideline", r"guideline"),
-    ("consultation", r"consult"),
+    ("consultation", r"\bconsult(ation|s)?\b"),
     ("q_and_a", r"q\s*&\s*a"),
     ("opinion", r"opinion"),
 ]

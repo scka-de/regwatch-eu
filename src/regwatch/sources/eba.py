@@ -4,38 +4,17 @@ from __future__ import annotations
 
 import logging
 from datetime import date
-from html.parser import HTMLParser
 
 import feedparser
 import httpx
 
 from regwatch.models import RawChange
 from regwatch.regulations.base import Regulation
+from regwatch.sources._utils import strip_html
 
 logger = logging.getLogger(__name__)
 
 EBA_RSS_URL = "https://www.eba.europa.eu/news-press/news/rss.xml"
-
-
-class _HTMLStripper(HTMLParser):
-    """Simple HTML tag stripper."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._parts: list[str] = []
-
-    def handle_data(self, data: str) -> None:
-        self._parts.append(data)
-
-    def get_text(self) -> str:
-        return " ".join(self._parts).strip()
-
-
-def _strip_html(html: str) -> str:
-    """Remove HTML tags and return plain text."""
-    stripper = _HTMLStripper()
-    stripper.feed(html)
-    return stripper.get_text()
 
 
 class EbaSource:
@@ -65,6 +44,8 @@ class EbaSource:
 
         for entry in feed.entries:
             raw = self._parse_entry(entry)
+            if raw is None or not raw.url:
+                continue
             if raw.date < since:
                 continue
             # Filter by regulation keywords in title
@@ -88,7 +69,7 @@ class EbaSource:
             logger.warning("No published date for EBA entry '%s', using today()", title)
             parsed_date = date.today()
 
-        description = _strip_html(summary_html)
+        description = strip_html(summary_html)
 
         return RawChange(
             title=title,
