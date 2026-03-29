@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 
 import click
-import pandas as pd
 from rich.console import Console
 from rich.table import Table
 
@@ -80,7 +79,7 @@ def check(regulation, since, doc_type, source, fmt):
             reg = row["regulation"]
             table.add_row(
                 str(row["date"]),
-                str(reg) if pd.notna(reg) else "---",
+                str(reg) if reg is not None and str(reg) != "nan" else "---",
                 str(row["type"]),
                 str(row["source"]),
                 str(row["title"])[:60],

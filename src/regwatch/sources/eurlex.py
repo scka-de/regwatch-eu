@@ -13,6 +13,7 @@ from regwatch.regulations.base import Regulation
 logger = logging.getLogger(__name__)
 
 SPARQL_ENDPOINT = "https://publications.europa.eu/webapi/rdf/sparql"
+SPARQL_RESULT_LIMIT = 200
 
 
 def _escape_sparql_string(s: str) -> str:
@@ -29,6 +30,8 @@ class EurLexSource:
         if not regulations:
             return []
         query = self._build_query(since, regulations)
+        if not query:
+            return []
         try:
             response = httpx.post(
                 SPARQL_ENDPOINT,
@@ -51,6 +54,9 @@ class EurLexSource:
         for reg in regulations:
             all_keywords.extend(reg.keywords)
 
+        if not all_keywords:
+            return ""
+
         # Build FILTER clause matching any keyword in title (case-insensitive)
         keyword_filters = " || ".join(
             f'CONTAINS(LCASE(?title), "{_escape_sparql_string(kw.lower())}")'
@@ -72,7 +78,7 @@ SELECT DISTINCT ?cellarURI ?title ?date ?celex WHERE {{
     FILTER({keyword_filters})
 }}
 ORDER BY DESC(?date)
-LIMIT 200
+LIMIT {SPARQL_RESULT_LIMIT}
 """
 
     def _parse_response(self, data: dict) -> list[RawChange]:

@@ -6,8 +6,6 @@ import logging
 from datetime import date, timedelta
 from pathlib import Path
 
-import pandas as pd
-
 from regwatch.cache import Cache
 from regwatch.classifier import (
     classify_regulation,
@@ -21,6 +19,8 @@ from regwatch.registry import get_regulations, get_sources
 __version__ = "0.1.0"
 logger = logging.getLogger(__name__)
 DEFAULT_CACHE_DIR = str(Path.home() / ".regwatch")
+DEFAULT_INITIAL_LOOKBACK_DAYS = 180
+DEFAULT_CHECK_LOOKBACK_DAYS = 30
 
 
 class RegWatch:
@@ -54,7 +54,7 @@ class RegWatch:
         for src in sources:
             since = self._cache.last_update(src.id)
             if since is None:
-                since = date.today() - timedelta(days=180)
+                since = date.today() - timedelta(days=DEFAULT_INITIAL_LOOKBACK_DAYS)
             try:
                 raw_changes = src.fetch(since=since, regulations=self._regulations)
             except Exception as e:
@@ -91,8 +91,10 @@ class RegWatch:
         since: str | None = None,
         types: list[str] | None = None,
         sources: list[str] | None = None,
-    ) -> pd.DataFrame:
+    ):
         """Query regulatory changes from local cache."""
+        import pandas as pd
+
         if since:
             try:
                 since_date = date.fromisoformat(since)
@@ -101,7 +103,7 @@ class RegWatch:
                     f"Invalid date format: '{since}'. Expected YYYY-MM-DD."
                 ) from None
         else:
-            since_date = date.today() - timedelta(days=30)
+            since_date = date.today() - timedelta(days=DEFAULT_CHECK_LOOKBACK_DAYS)
         results = self._cache.query(
             regulations=regulations,
             since=since_date,

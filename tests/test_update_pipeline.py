@@ -3,7 +3,7 @@
 from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
 
-from regwatch import RegWatch
+from regwatch import DEFAULT_INITIAL_LOOKBACK_DAYS, RegWatch
 from regwatch.models import RawChange
 
 
@@ -78,7 +78,7 @@ def test_update_since_none_defaults_to_180_days(tmp_path):
 
     call_args = fake_source.fetch.call_args
     since_arg = call_args.kwargs["since"]
-    expected = date.today() - timedelta(days=180)
+    expected = date.today() - timedelta(days=DEFAULT_INITIAL_LOOKBACK_DAYS)
     assert since_arg == expected
 
 
