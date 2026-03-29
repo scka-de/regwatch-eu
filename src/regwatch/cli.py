@@ -30,8 +30,8 @@ def cli():
 @click.option("--source", default=None, help="Only fetch from this source (eurlex, esma, eba).")
 def update(source):
     """Fetch latest changes from all sources."""
-    rw = RegWatch(cache_dir=_get_cache_dir())
-    stats = rw.update(source=source)
+    with RegWatch(cache_dir=_get_cache_dir()) as rw:
+        stats = rw.update(source=source)
     for src_id, count in stats.items():
         if count == -1:
             console.print(f"Fetching {src_id}... [red]ERROR[/red]")
@@ -53,11 +53,11 @@ def update(source):
 @click.option("--format", "fmt", default="table", help="Output format: table, json, csv.")
 def check(regulation, since, doc_type, source, fmt):
     """Query regulatory changes from local cache."""
-    rw = RegWatch(cache_dir=_get_cache_dir())
-    regs = regulation.split(",") if regulation else None
-    types = [doc_type] if doc_type else None
-    sources = [source] if source else None
-    df = rw.check(regulations=regs, since=since, types=types, sources=sources)
+    with RegWatch(cache_dir=_get_cache_dir()) as rw:
+        regs = regulation.split(",") if regulation else None
+        types = [doc_type] if doc_type else None
+        sources = [source] if source else None
+        df = rw.check(regulations=regs, since=since, types=types, sources=sources)
     if fmt == "json":
         click.echo(df.to_json(orient="records", date_format="iso", indent=2))
     elif fmt == "csv":
@@ -86,8 +86,8 @@ def check(regulation, since, doc_type, source, fmt):
 @cli.command()
 def status():
     """Show cache info and last update time."""
-    rw = RegWatch(cache_dir=_get_cache_dir())
-    df = rw.check(since="2000-01-01")
+    with RegWatch(cache_dir=_get_cache_dir()) as rw:
+        df = rw.check(since="2000-01-01")
     console.print(f"regwatch-eu v{__version__}\n")
     console.print(f"Cache: {_get_cache_dir()}/cache.db")
     if df.empty:

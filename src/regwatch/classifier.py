@@ -154,7 +154,7 @@ def classify_regulation(
 
     # Layer 3: Optional LLM fallback
     if llm_classify is not None:
-        return llm_classify(raw)
+        return llm_classify(raw.title, raw.description)
 
     return None
 
